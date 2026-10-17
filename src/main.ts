@@ -109,7 +109,7 @@ export default class OutlinkNodeSizePlugin extends Plugin {
 
     recompute() {
         const resolved = this.app.metadataCache.resolvedLinks;
-        this.sizes = computeSizes(resolved, this.settings as SizeOptions);
+        this.sizes = computeSizes(resolved, this.settings);
         this.redrawAll();
     }
 
