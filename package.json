@@ -1,6 +1,6 @@
 {
   "name": "outlink-node-size",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Obsidian plugin: size graph nodes by the aggregate size of the nodes they link to.",
   "main": "main.js",
   "scripts": {
