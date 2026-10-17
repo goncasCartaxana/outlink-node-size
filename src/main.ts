@@ -156,25 +156,24 @@ export default class OutlinkNodeSizePlugin extends Plugin {
     /** Wrap setData/initGraphics so freshly built nodes are patched before the next frame. */
     private attach(renderer: GraphRenderer): RendererState {
         const state: RendererState = { active: true, restore: () => {} };
-        const wrapped: Array<{ key: string; orig: unknown; wrapper: unknown }> = [];
+        const wrapped: Array<{ key: "setData" | "initGraphics"; orig: (...args: unknown[]) => unknown; wrapper: (...args: unknown[]) => unknown }> = [];
 
         for (const key of ["setData", "initGraphics"] as const) {
             const orig = renderer[key];
             if (typeof orig !== "function") continue;
-            const plugin = this;
-            const wrapper = function (this: unknown, ...args: unknown[]) {
-                const result = orig.apply(this, args);
-                if (state.active) plugin.patchNodes(renderer);
+            const wrapper = (...args: unknown[]) => {
+                const result = orig.apply(renderer, args);
+                if (state.active) this.patchNodes(renderer);
                 return result;
             };
-            renderer[key] = wrapper as any;
+            renderer[key] = wrapper;
             wrapped.push({ key, orig, wrapper });
         }
 
         state.restore = () => {
             // Only undo our wrapper if nobody wrapped on top of it; otherwise it just goes inert.
             for (const { key, orig, wrapper } of wrapped) {
-                if (renderer[key] === wrapper) renderer[key] = orig as any;
+                if (renderer[key] === wrapper) renderer[key] = orig;
             }
         };
         return state;
@@ -229,6 +228,10 @@ export default class OutlinkNodeSizePlugin extends Plugin {
 class OutlinkSettingTab extends PluginSettingTab {
     constructor(app: App, private plugin: OutlinkNodeSizePlugin) {
         super(app, plugin);
+    }
+
+    getSettingDefinitions() {
+        return [];
     }
 
     display(): void {
